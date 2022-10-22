@@ -10,9 +10,14 @@ pipeline {
                 }
             }
         }
-        stage('Test') {
+        stage('Registry imagem') {
             steps {
-                echo 'Testing..'
+                echo 'Dockerhub registry'
+                script {
+                    docker.witchRegistry('https://registry.hub.docker.com', dockerhub)
+                        dockerapp.push('latest')
+                        dockerapp.push("${env.BUILD_ID}")
+                }
             }
         }
         stage('Deploy') {
