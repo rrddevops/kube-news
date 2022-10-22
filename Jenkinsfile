@@ -31,7 +31,6 @@ pipeline {
                     sh 'kubectl apply -f ./k8s/deployments.yaml'
                 }
 
-                }
             }
         }
     }
