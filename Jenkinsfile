@@ -14,15 +14,20 @@ pipeline {
             steps {
                 echo 'Dockerhub registry'
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', dockerhub)
+                    docker.withRegistry('https://registry.hub.docker.com', dockerub)
                         dockerapp.push('latest')
                         dockerapp.push("${env.BUILD_ID}")
                 }
             }
         }
-        stage('Deploy') {
+        stage('Deploy K8S') {
             steps {
                 echo 'Deploying....'
+                withKubeconfig([credentialsID: 'kubeconfig']) {
+                    sh 'kubectl apply -f ./k8s/deployments.yaml'
+                }
+
+                }
             }
         }
     }
