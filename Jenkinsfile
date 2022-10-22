@@ -15,8 +15,8 @@ pipeline {
                 echo 'Dockerhub registry'
                 script {
                     withDockerRegistry([ credentialsId: "dockehub", url: "https://registry.hub.docker.com" ]) {
-                        dockerImage.push('latest')
-                        dockerImage.push("${env.BUILD_ID}")
+                        dockerapp.push('latest')
+                        dockerapp.push('${env.BUILD_ID}')
                 }
             }
         }
