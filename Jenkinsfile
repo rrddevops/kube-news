@@ -14,7 +14,7 @@ pipeline {
             steps {
                 echo 'Dockerhub registry'
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', dockerub)
+                    docker.withRegistry('https://registry.hub.docker.com', dockehub)
                         dockerapp.push('latest')
                         dockerapp.push("${env.BUILD_ID}")
                 }
