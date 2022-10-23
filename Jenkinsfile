@@ -1,28 +1,39 @@
-pipeline {
+pipeline{
     agent any
 
     stages {
 
-        stage('Build') {
+        stage ('Build Docker Image') {
             steps {
-                echo 'Building..'
-                script {
+                script{
                     dockerapp = docker.build("rodrigordavila/kube-news:${env.BUILD_ID}", '-f ./src/Dockerfile ./src')
                 }
             }
         }
 
-        stage('Registry imagem') {
+        stage ('Push Docker Image') {
             steps {
-                echo 'Dockerhub registry'
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockehub') {
+                    docker.withRegistry('https://registry.hub.docker.com/', 'dockerhub') {
                         dockerapp.push('latest')
                         dockerapp.push("${env.BUILD_ID}")
                     }
                 }
             }
         }
-              
+
+
+        stage ('Deploy Kubernetes') {
+            environment{
+                tag_version = "${env.BUILD_ID}"
+            }
+            steps {
+                withKubeConfig ([credentialsId: 'kubeconfig']) {
+                    sh 'sed -i "s/{{TAG}}/$tag_version/g" ./k8s/deployment.yaml'
+                    sh 'kubectl apply -f ./k8s/deployment.yaml'
+                } 
+            } 
+        }           
     }
+
 }
