@@ -5,24 +5,24 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: postgre
+      app: postgre 
   template:
     metadata:
       labels:
         app: postgre
     spec:
       containers:
-        - name: postgre
-          image: postgres:15.0
-          ports:
-          - containerPort: 5432
-          env:
-          - name: POSTGRES_DB
-            value: "kubenews"
-          - name: POSTGRES_USER
-            value: "kubenews"
-          - name: POSTGRES_PASSWORD
-            value: "Pg#123"
+       - name: postgre    
+         image: postgres:15.0
+         ports:
+         - containerPort: 5432
+         env:
+         - name: POSTGRES_DB
+           value: "kubenews"
+         - name: POSTGRES_USER
+           value: "kubenews"             
+         - name: POSTGRES_PASSWORD
+           value: "Pg#123"
 
 ---
 
@@ -37,13 +37,14 @@ spec:
     - port: 5432
   type: ClusterIP
 
---- 
+---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: web
 spec:
+  replicas: 6
   selector:
     matchLabels:
       app: web
@@ -51,21 +52,26 @@ spec:
     metadata:
       labels:
         app: web
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
-        - name: web
-          image: rodrigordavila/kube-news:v1
-          ports:
-          - containerPort: 8080
-          env:
-          - name: DB_DATABASE
-            value: "kubenews"
-          - name: DB_USERNAME
-            value: "kubenews"
-          - name: DB_PASSWORD
-            value: "Pg#123"
-          - name: DB_HOST 
-            value: "postgre"
+       - name: web  
+         image: jrgregorio/kube-news:{{TAG}}
+         ports:
+         - containerPort: 8080
+         env:
+         - name: DB_DATABASE
+           value: "kubenews"
+         - name: DB_USERNAME
+           value: "kubenews"             
+         - name: DB_PASSWORD
+           value: "Pg#123"
+         - name: DB_HOST
+           value: "postgre"
+
 ---
 
 apiVersion: v1
@@ -76,7 +82,6 @@ spec:
   selector:
     app: web
   ports:
-    - port: 8080
-      targetPort: 80
-      nodePort: 30000
-  type: NodePort
+    - port: 80
+      targetPort: 8080
+  type: LoadBalancer
