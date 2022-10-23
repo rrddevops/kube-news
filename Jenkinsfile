@@ -23,19 +23,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy K8S') {
-            environment {
-                tag_version = "${env.BUILD_ID}"
-            }
-            steps {
-                echo 'Deploying....'
-                withKubeConfig ([credentialsID: 'kubeconfig']) {
-                    sh 'sed -i "s/{{TAG}}/$tag_version/g" ./k8s/deployment.yaml'
-                    sh 'kubectl apply -f ./k8s/deployment.yaml'
-                }
-
-            }
-        }
+              
     }
 }
